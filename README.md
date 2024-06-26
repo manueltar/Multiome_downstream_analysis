@@ -10,3 +10,6 @@
 
 \$ bash ~/Scripts/Wraper_scripts/76_Per_cluster_DESeq2_Seurat_analysis_time_covariate_vs_Genotype.sh \<path_to_analysis\> \<analysis_name\>
 
+## Extract linked peaks to DE genes, classify them into TSS and non TSS, overlap against the ENSEMBL K562_Regulatory_Build (https://ftp.ensembl.org/pub/release-111/regulation/homo_sapiens/RegulatoryFeatureActivity/K562/), intersect with SNPs and number them. Also it build the initial input table for locus representation
+
+\$ bash ~/Scripts/Wraper_scripts/66_Peaks_extraction_and_classification_from_DESeq2_Seurat_analysis_time_covariate_vs_Genotype.sh \<path_to_analysis\> \<analysis_name\>
