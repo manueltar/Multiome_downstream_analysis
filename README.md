@@ -18,3 +18,7 @@
 ## Perform Differential Accessibility (DA) analysis comparing per cluster the peak accessibility of every genotype against the wt genotype
 
 \$ bash ~/Scripts/Wraper_scripts/77_Per_cluster_DESeq2_Seurat_analysis_time_covariate_vs_Genotype_ATAC.sh \<path_to_analysis\> \<analysis_name\>
+
+## Print the situation plots with all the annotations for every locus plus the CPM values for the gene EXP and the chromatin accessibility
+
+\$ bash ~/Scripts/Wraper_scripts/68_Per_locus_representation_DESeq2_Seurat_time_as_a_covariate.sh \<path_to_analysis\> \<analysis_name\>
