@@ -205,6 +205,20 @@ data_wrangling = function(option_list)
   cat(sprintf(as.character(CUX1)))
   cat("\n")
   
+  #### READ and transform DE_genes ----
+  
+  DE_genes<-readRDS(file=opt$DE_genes)
+  
+  cat("DE_genes_0\n")
+  cat(str(DE_genes))
+  cat("\n")
+  
+  DE_genes_SIG<-unique(DE_genes[which(DE_genes$Minus_logpval >= 1.3),])
+  
+  cat("DE_genes_SIG_0\n")
+  cat(str(DE_genes_SIG))
+  cat("\n")
+  
   #### READ and transform Selected_genes_classified ----
   
   Selected_genes_classified<-readRDS(file=opt$Selected_genes_classified)
@@ -246,7 +260,7 @@ data_wrangling = function(option_list)
   
   #### Add missing genes ----
   
-  new_genes_to_add_string<-unique(c(ery_genes_array,megak_genes_array,marker_genes_array,myeloid_genes_array,ANAPC_genes,EZH2_signature,CUX1))
+  new_genes_to_add_string<-unique(c(ery_genes_array,megak_genes_array,marker_genes_array,myeloid_genes_array,ANAPC_genes,EZH2_signature,CUX1,unique(DE_genes_SIG$Symbol)))
   
   cat("new_genes_to_add_string_0\n")
   cat(str(new_genes_to_add_string))
@@ -261,6 +275,7 @@ data_wrangling = function(option_list)
   
   
   new_genes_to_add$Symbol<-new_genes_to_add_string
+  new_genes_to_add$GENE_CLASS<-NA
   
   new_genes_to_add$GENE_CLASS[which(new_genes_to_add$Symbol%in%ery_genes_array)]<-'Erythrocyte'
   new_genes_to_add$GENE_CLASS[which(new_genes_to_add$Symbol%in%megak_genes_array)]<-'Megakaryocyte'
@@ -270,6 +285,7 @@ data_wrangling = function(option_list)
   new_genes_to_add$GENE_CLASS[which(new_genes_to_add$Symbol%in%EZH2_signature)]<-'EZH2_signature'
   new_genes_to_add$GENE_CLASS[which(new_genes_to_add$Symbol%in%CUX1)]<-'CUX1'
   
+  new_genes_to_add$GENE_CLASS[is.na(new_genes_to_add$GENE_CLASS)]<-'Unclassified'
   
   
   
@@ -305,7 +321,7 @@ data_wrangling = function(option_list)
                                                           'MEP_progenitor','Megakaryocyte','Platelet','Platelet_volume',
                                                           'Erythrocyte','Mitosis','ANAPC_genes',
                                                           'PU1_target_genes','RUNX1_target_genes','GATA_target_genes',
-                                                          'AML_myeloid','REST_of_genes')),
+                                                          'AML_myeloid','Unclassified')),
                                           ordered=T))
   
   cat("ALL_genes_1\n")
@@ -446,6 +462,9 @@ main = function() {
                 metavar="type", 
                 help="Path to tab-separated input file listing regions to analyze. Required."),
     make_option(c("--Selected_genes_classified"), type="character", default=NULL, 
+                metavar="type", 
+                help="Path to tab-separated input file listing regions to analyze. Required."),
+    make_option(c("--DE_genes"), type="character", default=NULL, 
                 metavar="type", 
                 help="Path to tab-separated input file listing regions to analyze. Required."),
     make_option(c("--ANAPC_genes"), type="character", default=NULL, 

@@ -36,7 +36,7 @@ name_Peak_extraction=$(echo "$type""_job")
 seff_name=$(echo "seff_""$type")
 
 
-Rscript_Peak_extraction=$(echo "$Rscripts_path""205_Extract_Peaks_for_DA_DESeq2_Seurat_time_covariate_v2.R")
+Rscript_Peak_extraction=$(echo "$Rscripts_path""205_Extract_Peaks_for_DA_DESeq2_Seurat_time_covariate_v3.R")
 
 
 Seurat_object=$(echo "/group/soranzo/manuel.tardaguila/SC_RNA_seq/k562_multiome/NEW_object_output/merged_downstream_analysis_FOR_DANIELA.rds")
@@ -47,14 +47,12 @@ marker_genes_array=$(echo 'ANAPC7,STIL,KIF15,HBQ1,HBZ,HBA2,GP6,FYB1,CCR7,IL1B,IL
 ANAPC_genes=$(echo 'ANAPC1,ANAPC10,ANAPC11,ANAPC13,ANAPC15,ANAPC16,ANAPC2,ANAPC4,ANAPC5,ANAPC7')
 EZH2_signature=$(echo 'EZH2,XRCC2,CDKN1A,CDKN2D,ZEB1,ZEB2,TWIST')
 CUX1=$(echo "CUX1")
-
-
-
 Selected_genes_classified=$(echo '/group/soranzo/manuel.tardaguila/SC_RNA_seq/k562_multiome/NEW_object_output/Per_cluster_DESeq2_time_covariate_model/Selected_genes_classified.rds')
+DE_genes=$(echo '/group/soranzo/manuel.tardaguila/SC_RNA_seq/k562_multiome/NEW_object_output/Per_cluster_DESeq2_time_covariate_model/DE_results.rds')
 
 
 
-myjobid_Peak_extraction=$(sbatch --job-name=$name_Peak_extraction --output=$outfile_Peak_extraction --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=6 --mem-per-cpu=4096 --parsable --wrap="Rscript $Rscript_Peak_extraction --Seurat_object $Seurat_object --ery_genes_array $ery_genes_array --myeloid_genes_array $myeloid_genes_array --megak_genes_array $megak_genes_array --marker_genes_array $marker_genes_array --ANAPC_genes $ANAPC_genes --EZH2_signature $EZH2_signature --CUX1 $CUX1 --Selected_genes_classified $Selected_genes_classified --type $type --out $output_dir")
+myjobid_Peak_extraction=$(sbatch --job-name=$name_Peak_extraction --output=$outfile_Peak_extraction --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=6 --mem-per-cpu=4096 --parsable --wrap="Rscript $Rscript_Peak_extraction --Seurat_object $Seurat_object --ery_genes_array $ery_genes_array --myeloid_genes_array $myeloid_genes_array --megak_genes_array $megak_genes_array --marker_genes_array $marker_genes_array --ANAPC_genes $ANAPC_genes --EZH2_signature $EZH2_signature --CUX1 $CUX1 --DE_genes $DE_genes --Selected_genes_classified $Selected_genes_classified --type $type --out $output_dir")
 myjobid_seff_Peak_extraction=$(sbatch --dependency=afterany:$myjobid_Peak_extraction --open-mode=append --output=$outfile_Peak_extraction --job-name=$seff_name --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=1 --mem-per-cpu=128M --parsable --wrap="seff $myjobid_Peak_extraction >> $outfile_Peak_extraction")
 
 conda deactivate
@@ -249,7 +247,7 @@ myjobid_seff_Number_the_peaks=$(sbatch --dependency=afterany:$myjobid_Number_the
 
 module load R/4.1.0
 
-Rscript_Build_Input_regions=$(echo "$Rscripts_path""206_Build_Input_regions_for_DA_DESeq2_time_covariate.R")
+Rscript_Build_Input_regions=$(echo "$Rscripts_path""206_Build_Input_regions_for_DA_DESeq2_time_covariate_v2.R")
 
 type=$(echo "Build_Input_regions")
 
@@ -267,14 +265,14 @@ megak_genes_array=$(echo 'GP9,KIF15,KIF22,GP6,CMTM5,KLF1,TUBB1,ITGA2B,FGF13,SPTA
 marker_genes_array=$(echo 'GYPA,ITGA2B,GP1BB,MECOM,PRDX1,ACSL4')
 ANAPC_genes=$(echo 'ANAPC1,ANAPC10,ANAPC11,ANAPC13,ANAPC15,ANAPC16,ANAPC2,ANAPC4,ANAPC5,ANAPC7')
 ANAPC_genes=$(echo 'ANAPC1,ANAPC10,ANAPC11,ANAPC13,ANAPC15,ANAPC16,ANAPC2,ANAPC4,ANAPC5,ANAPC7,XRCC2,EZH2,CUX1')
-
+DE_genes=$(echo '/group/soranzo/manuel.tardaguila/SC_RNA_seq/k562_multiome/NEW_object_output/Per_cluster_DESeq2_time_covariate_model/DE_results.rds')
 Selected_genes_classified=$(echo '/group/soranzo/manuel.tardaguila/SC_RNA_seq/k562_multiome/NEW_object_output/Per_cluster_DESeq2_time_covariate_model/Selected_genes_classified.rds')
 
 ensembl_gtf=$(echo "/group/soranzo/manuel.tardaguila/SC_RNA_seq/k562_multiome/NEW_object_output/reference_files/Homo_sapiens.GRCh38.111.gtf")
 
 # --dependency=afterany:$myjobid_Number_the_peaks
 
-myjobid_Build_Input_regions=$(sbatch --dependency=afterany:$myjobid_Number_the_peaks --job-name=$name_Build_Input_regions --output=$outfile_Build_Input_regions --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=4 --mem-per-cpu=4096M --parsable --wrap="Rscript $Rscript_Build_Input_regions --Master_peak_file $Master_peak_file --ensembl_gtf $ensembl_gtf --ery_genes_array $ery_genes_array --myeloid_genes_array $myeloid_genes_array --megak_genes_array $megak_genes_array --marker_genes_array $marker_genes_array --ANAPC_genes $ANAPC_genes --Selected_genes_classified $Selected_genes_classified --type $type --out $output_dir")
+myjobid_Build_Input_regions=$(sbatch --dependency=afterany:$myjobid_Number_the_peaks --job-name=$name_Build_Input_regions --output=$outfile_Build_Input_regions --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=4 --mem-per-cpu=4096M --parsable --wrap="Rscript $Rscript_Build_Input_regions --Master_peak_file $Master_peak_file --ensembl_gtf $ensembl_gtf --ery_genes_array $ery_genes_array --myeloid_genes_array $myeloid_genes_array --megak_genes_array $megak_genes_array --marker_genes_array $marker_genes_array --ANAPC_genes $ANAPC_genes --Selected_genes_classified $Selected_genes_classified --DE_genes $DE_genes --type $type --out $output_dir")
 myjobid_seff_Build_Input_regions=$(sbatch --dependency=afterany:$myjobid_Build_Input_regions --open-mode=append --output=$outfile_Build_Input_regions --job-name=$seff_name --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=1 --mem-per-cpu=128M --parsable --wrap="seff $myjobid_Build_Input_regions >> $outfile_Build_Input_regions")
 
 
