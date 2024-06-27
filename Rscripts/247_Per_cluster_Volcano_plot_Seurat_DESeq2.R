@@ -865,7 +865,7 @@ main = function() {
                         option_list = option_list)
   opt <<- parse_args(parser)
   
-  # volcano_function(opt)
+  volcano_function(opt)
   volcano_subset_function(opt)
 
   
