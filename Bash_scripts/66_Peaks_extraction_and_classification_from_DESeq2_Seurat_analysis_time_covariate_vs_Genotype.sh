@@ -36,21 +36,25 @@ name_Peak_extraction=$(echo "$type""_job")
 seff_name=$(echo "seff_""$type")
 
 
-Rscript_Peak_extraction=$(echo "$Rscripts_path""205_Extract_Peaks_for_DA_DESeq2_Seurat_time_covariate.R")
+Rscript_Peak_extraction=$(echo "$Rscripts_path""205_Extract_Peaks_for_DA_DESeq2_Seurat_time_covariate_v2.R")
 
 
 Seurat_object=$(echo "/group/soranzo/manuel.tardaguila/SC_RNA_seq/k562_multiome/NEW_object_output/merged_downstream_analysis_FOR_DANIELA.rds")
 ery_genes_array=$(echo 'HBQ1,HBZ,HBA1,HBA2,HBG1,HBG2,MYL4,ANKRD26')
 myeloid_genes_array=$(echo 'CCR7,IL33,SLC44A1,AXL,INHBA,IGF1R,KIF21A,IL33,IFI16,ZEB1,ALDH1A2,IL6ST,TJP2,LTBP1,BACH2,CCL3,EPB41')
 megak_genes_array=$(echo 'GP9,KIF15,KIF22,GP6,CMTM5,KLF1,TUBB1,ITGA2B,FGF13,SPTA1,GFI1B,MYH9,MYLK,ITGB3,KCNT2,ADAM10,MEF2C,LRP12,ATP2C1,SPTB,FYB1,TBL1X,BCOR,TBXA2R,GP6,FCGR2A,RHAG,GP1BB,EGF,GNAQ')
-marker_genes_array=$(echo 'GYPA,ITGA2B,GP1BB,MECOM,PRDX1,ACSL4')
-ANAPC_genes=$(echo 'ANAPC1,ANAPC10,ANAPC11,ANAPC13,ANAPC15,ANAPC16,ANAPC2,ANAPC4,ANAPC5,ANAPC7,XRCC2,EZH2,CUX1')
+marker_genes_array=$(echo 'ANAPC7,STIL,KIF15,HBQ1,HBZ,HBA2,GP6,FYB1,CCR7,IL1B,IL33,GYPA,ITGA2B')
+ANAPC_genes=$(echo 'ANAPC1,ANAPC10,ANAPC11,ANAPC13,ANAPC15,ANAPC16,ANAPC2,ANAPC4,ANAPC5,ANAPC7')
+EZH2_signature=$(echo 'EZH2,XRCC2,CDKN1A,CDKN2D,ZEB1,ZEB2,TWIST')
+CUX1=$(echo "CUX1")
+
+
 
 Selected_genes_classified=$(echo '/group/soranzo/manuel.tardaguila/SC_RNA_seq/k562_multiome/NEW_object_output/Per_cluster_DESeq2_time_covariate_model/Selected_genes_classified.rds')
 
 
 
-myjobid_Peak_extraction=$(sbatch --job-name=$name_Peak_extraction --output=$outfile_Peak_extraction --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=6 --mem-per-cpu=4096 --parsable --wrap="Rscript $Rscript_Peak_extraction --Seurat_object $Seurat_object --ery_genes_array $ery_genes_array --myeloid_genes_array $myeloid_genes_array --megak_genes_array $megak_genes_array --marker_genes_array $marker_genes_array --ANAPC_genes $ANAPC_genes --Selected_genes_classified $Selected_genes_classified --type $type --out $output_dir")
+myjobid_Peak_extraction=$(sbatch --job-name=$name_Peak_extraction --output=$outfile_Peak_extraction --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=6 --mem-per-cpu=4096 --parsable --wrap="Rscript $Rscript_Peak_extraction --Seurat_object $Seurat_object --ery_genes_array $ery_genes_array --myeloid_genes_array $myeloid_genes_array --megak_genes_array $megak_genes_array --marker_genes_array $marker_genes_array --ANAPC_genes $ANAPC_genes --EZH2_signature $EZH2_signature --CUX1 $CUX1 --Selected_genes_classified $Selected_genes_classified --type $type --out $output_dir")
 myjobid_seff_Peak_extraction=$(sbatch --dependency=afterany:$myjobid_Peak_extraction --open-mode=append --output=$outfile_Peak_extraction --job-name=$seff_name --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=1 --mem-per-cpu=128M --parsable --wrap="seff $myjobid_Peak_extraction >> $outfile_Peak_extraction")
 
 conda deactivate
