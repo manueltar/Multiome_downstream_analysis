@@ -180,7 +180,7 @@ myjobid_seff_Heatmaps=$(sbatch --dependency=afterany:$myjobid_Heatmaps --open-mo
 
 module load R/4.1.0
 
-Rscript_volcano_plots=$(echo "$Rscripts_path""252_Per_cluster_Volcano_plot_Seurat_DESeq2_DA.R")
+Rscript_volcano_plots=$(echo "$Rscripts_path""252_Per_cluster_Volcano_plot_Seurat_DESeq2_DA_v2.R")
 
 type=$(echo "volcano_plots")
 
@@ -205,7 +205,7 @@ selected_comparisons=$(echo 'Genotype_A_G_vs_G_G,Genotype_A_A_vs_G_G,Genotype_De
 
 # --dependency=afterany:$myjobid_collect_DA
 
-myjobid_volcano_plots=$(sbatch --dependency=afterany:$myjobid_collect_DA --job-name=$name_volcano_plots --output=$outfile_volcano_plots --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=2 --mem-per-cpu=1024M --parsable --wrap="Rscript $Rscript_volcano_plots --platelet_volume_genes $platelet_volume_genes --DA_results $DA_results --type $type --out $output_dir --selected_clusters $selected_clusters --selected_comparisons $selected_comparisons --platelet_genes $platelet_genes --EZH2_signature $EZH2_signature --AKT_signature $AKT_signature --ZEB1_signature $ZEB1_signature")
+myjobid_volcano_plots=$(sbatch --dependency=afterany:$myjobid_collect_DA --job-name=$name_volcano_plots --output=$outfile_volcano_plots --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=4 --mem-per-cpu=4096M --parsable --wrap="Rscript $Rscript_volcano_plots --platelet_volume_genes $platelet_volume_genes --DA_results $DA_results --type $type --out $output_dir --selected_clusters $selected_clusters --selected_comparisons $selected_comparisons --platelet_genes $platelet_genes --EZH2_signature $EZH2_signature --AKT_signature $AKT_signature --ZEB1_signature $ZEB1_signature")
 myjobid_seff_volcano_plots=$(sbatch --dependency=afterany:$myjobid_volcano_plots --open-mode=append --output=$outfile_volcano_plots --job-name=$seff_name --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=1 --mem-per-cpu=128M --parsable --wrap="seff $myjobid_volcano_plots >> $outfile_volcano_plots")
 
 

@@ -650,6 +650,55 @@ volcano_subset_function = function(option_list)
   }
   
   
+  DA_results_subset_long.dt<-data.table(DA_results_subset_long, key=c("comparison","seurat_cluster"))
+  NO_SIG_DA_results_subset_long<-as.data.frame(DA_results_subset_long.dt[,.SD[Minus_logpval < 1.3], by=key(DA_results_subset_long.dt)])
+  
+  if(DEBUG == 1)
+  {
+    cat("NO_SIG_DA_results_subset_long_0\n")
+    cat(str(NO_SIG_DA_results_subset_long))
+    cat("\n")
+  }
+  
+  NO_SIG_DA_results_subset_long.dt<-data.table(NO_SIG_DA_results_subset_long, key=c("comparison","seurat_cluster"))
+  test<-as.data.frame(NO_SIG_DA_results_subset_long.dt[,.(Symbol=sample(Symbol, round(0.1*length(Symbol)))), by=key(NO_SIG_DA_results_subset_long.dt)])
+  
+  test$Flag_subset<-1
+  
+  if(DEBUG == 1)
+  {
+    cat("test_0\n")
+    cat(str(test))
+    cat("\n")
+  }
+  
+  test_NO_NA<-test[-is.na(test$Symbol == "NA"),]
+  
+  if(DEBUG == 1)
+  {
+    cat("test_NO_NA_0\n")
+    cat(str(test_NO_NA))
+    cat("\n")
+  }
+  
+  NO_SIG_DA_results_subset_long$Flag_subset<-NA
+  
+  NO_SIG_DA_results_subset_long$Flag_subset[which(NO_SIG_DA_results_subset_long$Symbol%in%test_NO_NA$Symbol)]<-1
+  
+
+  if(DEBUG == 1)
+  {
+    cat("NO_SIG_DA_results_subset_long_1\n")
+    cat(str(NO_SIG_DA_results_subset_long))
+    cat("\n")
+  }
+  
+  
+  if(DEBUG == 1)
+  {
+    cat("Volcano_START:\n")
+    
+  }
   
   
   
@@ -657,7 +706,7 @@ volcano_subset_function = function(option_list)
                        aes(x=log2FoldChange,
                            y=Minus_logpval)) +
     geom_vline(xintercept=c(-0.25,0.25), color="gray", linetype='dashed',size=0.2)+
-    geom_point(data=DA_results_subset_long[which(DA_results_subset_long$Significance == 'NO'),],
+    geom_point(data=NO_SIG_DA_results_subset_long[which(NO_SIG_DA_results_subset_long$Flag_subset == 1),],
                color="black",fill="gray", stroke=0.2, shape=21, size=0.75)+
     geom_point(data=DA_results_subset_long[which(DA_results_subset_long$Significance == 'YES' &
                                             DA_results_subset_long$log2FoldChange >=0.25),],
