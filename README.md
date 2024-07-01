@@ -28,7 +28,7 @@
 \$ awk -F"\t" '{if($8 != "NA") print $0}' DE_results.tsv|awk -F"\t" '{if($8 >= 1.3) print $0}'|cut -f1|sort|uniq -c|sort -rg|wc -l
 1862
 
-Unique DA peaks
+## Unique DA peaks
 
 \$ awk -F"\t" '{if($8 != "NA") print $0}' DA_results.tsv|awk -F"\t" '{if($8 >= 1.3) print $0}'|cut -f1|sort|uniq -c|sort -rg|wc -l
 485
