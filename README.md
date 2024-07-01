@@ -22,3 +22,14 @@
 ## Print the situation plots with all the annotations for every locus plus the CPM values for the gene EXP and the chromatin accessibility
 
 \$ bash ~/Scripts/Wraper_scripts/68_Per_locus_representation_DESeq2_Seurat_time_as_a_covariate.sh \<path_to_analysis\> \<analysis_name\>
+
+## Unique DE genes
+
+\$ awk -F"\t" '{if($8 != "NA") print $0}' DE_results.tsv|awk -F"\t" '{if($8 >= 1.3) print $0}'|cut -f1|sort|uniq -c|sort -rg|wc -l
+1862
+
+Unique DA peaks
+
+\$ awk -F"\t" '{if($8 != "NA") print $0}' DA_results.tsv|awk -F"\t" '{if($8 >= 1.3) print $0}'|cut -f1|sort|uniq -c|sort -rg|wc -l
+485
+
