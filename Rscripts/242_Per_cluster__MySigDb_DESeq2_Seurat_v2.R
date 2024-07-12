@@ -57,6 +57,14 @@ AP_function = function(option_list)
   cat(sprintf(as.character(out)))
   cat("\n")
   
+  #### READ and transform out ----
+  
+  exemption_terms = unlist(strsplit(opt$exemption_terms, split=","))
+  
+  cat("exemption_terms_0\n")
+  cat(sprintf(as.character(exemption_terms)))
+  cat("\n")
+  
  
   #### READ and transform minGS_size ----
   
@@ -143,6 +151,9 @@ AP_function = function(option_list)
     cat("\n")
     
     LIST_TRUE_FINAL<-list()
+    
+    ALL_tested_TRUE_FINAL<-list()
+    
     
     
     for(iteration_array_comparisons in 1:length(array_comparisons))
@@ -423,29 +434,33 @@ AP_function = function(option_list)
                     Selected_pathways<-rbind(reference_gmt_sel,Selected_pathways)
                   }else{
                     
-                    #Include CUX1 gene set
+                    #Include Dorothea gene sets
                     
                     # gmt_sel_GREP
                     
-                    FLAG_CUX1<-sum(unique(reference_gmt_sel$id) == "CUX1_TARGET_GENES")
+                    indx<-which(unique(reference_gmt_sel$id)%in%exemption_terms)
+                    
+                    FLAG_oversized_but_interesting<-length(indx)
                     
                     
                     if(DEBUG ==1)
                     {
-                      cat("FLAG_CUX1_0\n")
-                      cat(str(FLAG_CUX1))
+                      cat("FLAG_oversized_but_interesting_0\n")
+                      cat(str(FLAG_oversized_but_interesting))
                       cat("\n")
                     }
                     
-                    if(FLAG_CUX1 > 0)
+                    if(FLAG_oversized_but_interesting > 0)
                     {
                       colnames(reference_gmt_sel)[which(colnames(reference_gmt_sel) == 'genes')]<-'ENTREZ'
                       Selected_pathways<-rbind(reference_gmt_sel,Selected_pathways)
                       
                       
-                      cat("Hello_world_CUX1\n")
+                      cat("Hello_world_FLAG_oversized_but_interesting\n")
+                      cat(sprintf(as.character(unique(reference_gmt_sel$name))))
+                      cat("\n")
                       
-                    }#FLAG_CUX1 > 0
+                    }#FLAG_oversized_but_interesting > 0
                     
                   }# dim(reference_gmt_sel)[1] >= minGS_size & dim(reference_gmt_sel)[1] <= maxGS_size
                 }#iteration_gmt_sel_GREP in 1:length(gmt_sel_GREP)
@@ -486,11 +501,54 @@ AP_function = function(option_list)
                   cat("\n")
                 }
                 
-                tested[[i]]<-gmt_sel_GREP[indx.select]
+                assayed_gmt<-gmt_sel_GREP[indx.select]
+                
+                if(DEBUG ==1)
+                {
+                  cat("assayed_gmt\n")
+                  cat(str(assayed_gmt))
+                  cat("\n")
+                }
+                
+                assayed_name_vector<-NULL
+                for(iteration_ALL_tested in 1:length(assayed_gmt)){
+                  
+                  assayed_gmt_sel<-assayed_gmt[[iteration_ALL_tested]]
+                  
+                  # if(DEBUG ==1)
+                  # {
+                  #   cat("assayed_gmt_sel\n")
+                  #   cat(str(assayed_gmt_sel))
+                  #   cat("\n")
+                  # }
+                  
+                  assayed_gmt_sel_name<-assayed_gmt_sel$name
+                  
+                  
+                  if(DEBUG ==1)
+                  {
+                    cat("assayed_gmt_sel_name\n")
+                    cat(str(assayed_gmt_sel_name))
+                    cat("\n")
+                  }
+                  
+                  assayed_name_vector[iteration_ALL_tested]<-assayed_gmt_sel_name
+                  
+                }#iteration_ALL_tested in 1:length(assayed_gmt)
+                
+                if(DEBUG ==1)
+                {
+                  cat("assayed_name_vector_0\n")
+                  cat(str(assayed_name_vector))
+                  cat("\n")
+                }
+                
+                
+                tested[[i]]<-assayed_name_vector
                 
                 ####ActivePathways seurat_cluster----
                 
-                AP_result<-ActivePathways(scores, gmt_sel_GREP[indx.select], background= background,
+                AP_result<-ActivePathways(scores, assayed_gmt, background= background,
                                           cutoff = pval_threshold,
                                           significant = 0.05)
                 
@@ -647,6 +705,30 @@ AP_function = function(option_list)
               }#length(gmt_sel_GREP) >1
             }# i in 1:dim(file_list_sel)[1]
             
+            if(length(tested) >0){
+              
+              ALL_tested = unique(unlist(tested))
+              
+              cat("ALL_tested_0\n")
+              cat(str(ALL_tested))
+              cat("\n")
+              
+              
+              ALL_tested_sel.df<-as.data.frame(ALL_tested)
+              
+              colnames(ALL_tested_sel.df)<-"Tested_Pathways"
+              
+              cat("ALL_tested_sel.df_0\n")
+              cat(str(ALL_tested_sel.df))
+              cat("\n")
+              
+              
+              ALL_tested_TRUE_FINAL[[iteration_array_comparisons]]<-ALL_tested_sel.df
+            
+              
+              
+            }# length(tested) >0
+            
             if(length(Final_result)>0)
             {
               FINAL_df = unique(as.data.frame(data.table::rbindlist(Final_result, fill = T)))
@@ -702,6 +784,30 @@ AP_function = function(option_list)
       }#dim(multiome_edgeR_results_NO_NA_sel_NO_DUP)[1] >0
     }#iteration_array_comparisons in 1:length(array_comparisons)
     
+    if(length(ALL_tested_TRUE_FINAL)>0)
+    {
+      BUCEPHALUS = unique(as.data.frame(data.table::rbindlist(ALL_tested_TRUE_FINAL, fill = T)))
+      
+      cat("BUCEPHALUS_0\n")
+      cat(str(BUCEPHALUS))
+      cat("\n")
+     
+      
+      path_MySigDb<-paste(out,'MySigDb','/',sep='')
+      
+      if (file.exists(path_MySigDb)){
+        
+      }else{
+        
+        dir.create(file.path(path_MySigDb))
+        
+      }#path_MySigDb
+      
+      setwd(path_MySigDb)
+      
+      write.table(BUCEPHALUS,file=paste("ALL_tested",".tsv", sep=''),sep="\t", quote=F, row.names = F)
+      
+    }#length(ALL_tested_TRUE_FINAL)>0
     
     if(length(LIST_TRUE_FINAL)>0)
     {
@@ -757,6 +863,9 @@ main = function() {
             "\n\n"))
   option_list <- list(
     make_option(c("--path_to_GMT"), type="character", default=NULL, 
+                metavar="type", 
+                help="Path to tab-separated input file listing regions to analyze. Required."),
+    make_option(c("--exemption_terms"), type="character", default=NULL, 
                 metavar="type", 
                 help="Path to tab-separated input file listing regions to analyze. Required."),
     make_option(c("--search_terms"), type="character", default=NULL, 

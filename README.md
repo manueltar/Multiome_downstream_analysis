@@ -33,3 +33,13 @@
 \$ awk -F"\t" '{if($8 != "NA") print $0}' DA_results.tsv|awk -F"\t" '{if($8 >= 1.3) print $0}'|cut -f1|sort|uniq -c|sort -rg|wc -l
 485
 
+## List of gene sets assayed is in List_of_tested_gene_sets.txt (n=803)
+
+## Classification of peaks
+
+\$ cut -f2 Master_peak_file_with_SNP_numbered_peaks.tsv|sort|uniq -c|sort -rg
+   6495 Linked_Peak
+   4284 Non_gene_associated_peak
+   4072 TSS_Peak
+
+
